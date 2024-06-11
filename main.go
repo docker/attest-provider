@@ -16,7 +16,6 @@ import (
 )
 
 const (
-	// timeout     = 15 * time.Second
 	defaultPort = 8090
 
 	certName = "tls.crt"

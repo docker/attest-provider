@@ -24,23 +24,37 @@ jobs:
       contents: read
     steps:
       - name: Harden Runner
-        uses: step-security/harden-runner@128a63446a954579617e875aaab7d2978154e969 # v2.4.0
+        uses: step-security/harden-runner@17d0e2bd7d51742c71671bd19fa12bdc9d40a3d6 # v2.8.1
         with:
           egress-policy: audit
 
-      - name: Set up Go 1.19
+      - name: Generate GitHub App Token
+        id: app-token
+        uses: actions/create-github-app-token@c8f55efbd427e7465d6da1106e7979bc8aaee856 # v1.10.1
+        with:
+          app-id: ${{ vars.DOCKER_READ_APP_ID }}
+          private-key: ${{ secrets.DOCKER_READ_APP_PRIVATE_KEY }}
+          repositories: "attest,attest-external-data-provider"
+
+      - name: Set up Go 1.22
         uses: actions/setup-go@cdcb36043654635271a94b9a6d1392de5bb323a7 # v5.0.1
         with:
-          go-version: 1.19
+          go-version: 1.22
 
       - name: Check out code into the Go module directory
         uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 # v4.1.6
 
+      - name: Download dependencies
+        run: |
+          export GOPRIVATE="github.com/docker/attest"
+          git config --global "url.https://x-access-token:${{ steps.app-token.outputs.token }}@github.com.insteadof" "https://github.com"
+          go mod download
+
       # source: https://github.com/golangci/golangci-lint-action
       - name: golangci-lint
-        uses: golangci/golangci-lint-action@08e2f20817b15149a52b5b3ebe7de50aff2ba8c5 # v3.4.0
+        uses: golangci/golangci-lint-action@a4f60bb28d35aeee14e6880718e0c85ff1882e64 # v6.0.1
         with:
-          version: v1.50.0
+          version: v1.59
 
   helm_build_test:
     name: "[Helm] Build and Test"
@@ -50,22 +64,30 @@ jobs:
       contents: read
     steps:
       - name: Harden Runner
-        uses: step-security/harden-runner@128a63446a954579617e875aaab7d2978154e969 # v2.4.0
+        uses: step-security/harden-runner@17d0e2bd7d51742c71671bd19fa12bdc9d40a3d6 # v2.8.1
         with:
           egress-policy: audit
 
-      - name: Set up Go 1.19
+      - name: Set up Go 1.22
         uses: actions/setup-go@cdcb36043654635271a94b9a6d1392de5bb323a7 # v5.0.1
         with:
-          go-version: 1.19
+          go-version: 1.22
 
       - name: Check out code into the Go module directory
         uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 # v4.1.6
 
+      - name: Generate GitHub App Token
+        id: app-token
+        uses: actions/create-github-app-token@c8f55efbd427e7465d6da1106e7979bc8aaee856 # v1.10.1
+        with:
+          app-id: ${{ vars.DOCKER_READ_APP_ID }}
+          private-key: ${{ secrets.DOCKER_READ_APP_PRIVATE_KEY }}
+          repositories: "attest,attest-external-data-provider"
+
       - name: Bootstrap e2e
         env:
-          KIND_VERSION: 0.17.0
-          BATS_VERSION: 1.8.2
+          KIND_VERSION: 0.23.0
+          BATS_VERSION: 1.11.0
         run: |
           mkdir -p $GITHUB_WORKSPACE/bin
           echo "${GITHUB_WORKSPACE}/bin" >> $GITHUB_PATH
@@ -74,7 +96,7 @@ jobs:
 
       - name: Create a kind cluster and install Gatekeeper
         env:
-          GATEKEEPER_VERSION: 3.11.0
+          GATEKEEPER_VERSION: 3.16.3
           KUBERNETES_VERSION: 1.26.0
         run: |
           kind create cluster --image kindest/node:v${KUBERNETES_VERSION} --name gatekeeper
@@ -82,6 +104,7 @@ jobs:
           helm repo add gatekeeper https://open-policy-agent.github.io/gatekeeper/charts
           helm install gatekeeper/gatekeeper \
             --version ${GATEKEEPER_VERSION} \
+            --set validatingWebhookTimeoutSeconds=15 \
             --set enableExternalData=true \
             --name-template=gatekeeper \
             --namespace security \
@@ -91,6 +114,7 @@ jobs:
       - name: Build and install attest-external-data-provider
         run: |
           ./scripts/generate-tls-cert.sh
+          export GITHUB_TOKEN=${{ steps.app-token.outputs.token }}
           make docker-buildx kind-load-image
           helm install attest-provider charts/external-data-provider \
             --set provider.tls.caBundle="$(cat certs/ca.crt | base64 | tr -d '\n\r')" \
@@ -99,4 +123,5 @@ jobs:
 
       - name: Run e2e
         run: |
+          export GATEKEEPER_NAMESPACE=security
           bats -t test/bats/test.bats
