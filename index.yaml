@@ -1,0 +1,16 @@
+apiVersion: v1
+entries:
+  attest-provider:
+  - apiVersion: v2
+    appVersion: 0.0.1
+    created: "2024-07-01T21:00:59.869484581Z"
+    description: A Helm chart for attest external data provider
+    digest: a9cde03a54fc0980676e0f259d6a8f1e0471bfcbfe6032f9568bb8dcc95080b1
+    home: https://github.com/docker/attest-provider
+    name: attest-provider
+    sources:
+    - https://github.com/docker/attest-provider.git
+    urls:
+    - https://github.com/docker/attest-provider/releases/download/attest-provider-0.0.1/attest-provider-0.0.1.tgz
+    version: 0.0.1
+generated: "2024-07-01T21:00:59.869490973Z"
