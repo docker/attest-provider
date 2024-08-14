@@ -212,8 +212,8 @@ github.com/dimchansky/utfbom v1.1.1 h1:vV6w1AhK4VMnhBno/TPVCoK9U/LP0PkLCS9tbxHdi
 github.com/dimchansky/utfbom v1.1.1/go.mod h1:SxdoEBH5qIqFocHMyGOXVAybYJdr71b1Q/j0mACtrfE=
 github.com/distribution/reference v0.6.0 h1:0IXCQ5g4/QMHHkarYzh5l+u8T3t73zM5QvfrDyIgxBk=
 github.com/distribution/reference v0.6.0/go.mod h1:BbU0aIcezP1/5jX/8MP0YiH4SdvB5Y4f/wlDRiLyi3E=
-github.com/docker/attest v0.3.0 h1:rXLcq5QEFeePwFzJjcNZYS1ePhpzXktRIVEn/rvA0co=
-github.com/docker/attest v0.3.0/go.mod h1:UuJ+jXWrCep9HDnWocjxD2fgyWisqCZ3kgQSJ+wOJyc=
+github.com/docker/attest v0.3.1 h1:cRxXrDPAngWVhhfmTGLOxY+zql4fgyJUVz58bqhAk+k=
+github.com/docker/attest v0.3.1/go.mod h1:UuJ+jXWrCep9HDnWocjxD2fgyWisqCZ3kgQSJ+wOJyc=
 github.com/docker/cli v27.1.1+incompatible h1:goaZxOqs4QKxznZjjBWKONQci/MywhtRv2oNn0GkeZE=
 github.com/docker/cli v27.1.1+incompatible/go.mod h1:JLrzqnKDaYBop7H2jaqPtU4hHvMKP+vjCwu2uszcLI8=
 github.com/docker/distribution v2.8.3+incompatible h1:AtKxIZ36LoNK51+Z6RpzLpddBirtxJnzDrHLEKxTAYk=
