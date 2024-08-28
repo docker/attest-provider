@@ -39,34 +39,43 @@ type ValidateHandlerOptions struct {
 }
 
 type validateHandler struct {
-	opts *ValidateHandlerOptions
+	opts     *ValidateHandlerOptions
+	verifier attest.Verifier
 }
 
 func NewValidateHandler(opts *ValidateHandlerOptions) (http.Handler, error) {
-	handler := &validateHandler{opts: opts}
-
-	// a TUF client can only be used once, so we need to create a new one for each request.
-	// we create this one up front to ensure that the TUF root is valid and to pre-load the metadata.
-	// TODO: this pre-loading works for the root, targets, snapshot, and timestamp roles, but not for delegated roles.
-	_, err := handler.createTUFClient()
+	root, err := tuf.GetEmbeddedRoot(opts.TUFRoot)
 	if err != nil {
 		// if this failed, don't return an error, just log it and continue
 		// this prevents the server from getting into a crash loop if the TUF repo is down or broken,
 		// and we can still recover if the TUF repo comes back up.
 		klog.ErrorS(err, "failed to initialize TUF client")
 	}
+	vopts := &policy.Options{
+		LocalTargetsDir:  opts.PolicyCacheDir,
+		LocalPolicyDir:   opts.PolicyDir,
+		AttestationStyle: config.AttestationStyle(opts.AttestationStyle),
+		ReferrersRepo:    opts.ReferrersRepo,
+		TUFClientOptions: &tuf.ClientOptions{
+			InitialRoot:    root.Data,
+			Path:           opts.TUFOutputPath,
+			MetadataSource: opts.TUFMetadataURL,
+			TargetsSource:  opts.TUFTargetsURL,
+			VersionChecker: tuf.NewDefaultVersionChecker(),
+		},
+	}
+	verifier, err := attest.NewVerifier(vopts)
+	if err != nil {
+		// if this failed, don't return an error, just log it and continue
+		// this prevents the server from getting into a crash loop if the TUF repo is down or broken,
+		// and we can still recover if the TUF repo comes back up.
+		klog.ErrorS(err, "failed to initialize TUF client")
+	}
+	handler := &validateHandler{opts: opts, verifier: verifier}
 
 	klog.Infof("validate handler initialized with %s TUF root", opts.TUFRoot)
 
 	return handler, nil
-}
-
-func (h *validateHandler) createTUFClient() (*tuf.Client, error) {
-	root, err := tuf.GetEmbeddedRoot(h.opts.TUFRoot)
-	if err != nil {
-		return nil, err
-	}
-	return tuf.NewClient(root.Data, h.opts.TUFOutputPath, h.opts.TUFMetadataURL, h.opts.TUFTargetsURL, tuf.NewDefaultVersionChecker())
 }
 
 func (h *validateHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
@@ -98,20 +107,6 @@ func (h *validateHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	tufClient, err := h.createTUFClient()
-	if err != nil {
-		utils.SendResponse(nil, fmt.Sprintf("unable to create TUF client: %v", err), w)
-		return
-	}
-
-	policyOpts := &policy.Options{
-		TUFClient:        tufClient,
-		LocalTargetsDir:  h.opts.PolicyCacheDir,
-		LocalPolicyDir:   h.opts.PolicyDir,
-		AttestationStyle: config.AttestationStyle(h.opts.AttestationStyle),
-		ReferrersRepo:    h.opts.ReferrersRepo,
-	}
-
 	results := make([]externaldata.Item, 0)
 	for _, key := range providerRequest.Request.Keys {
 		platform := "linux/amd64"
@@ -121,7 +116,7 @@ func (h *validateHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 			return
 		}
 
-		result, err := attest.Verify(ctx, src, policyOpts)
+		result, err := h.verifier.Verify(ctx, src)
 		if err != nil {
 			utils.SendResponse(nil, err.Error(), w)
 			return
