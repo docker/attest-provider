@@ -19,10 +19,12 @@ RUN --mount=type=secret,id=GITHUB_TOKEN <<EOT
 EOT
 # ---
 
+ARG VERSION="dev"
+
 RUN --mount=type=bind,source=.,target=/app \
     --mount=type=cache,target=$GOPATH/pkg/mod \
     --mount=type=cache,target=/root/.cache/go-build \
-    go build -o /bin/attest main.go
+    go build -ldflags "-X main.version=$VERSION" -o /bin/attest main.go
 
 FROM ${BASEIMAGE} AS production
 
