@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -42,13 +43,13 @@ type validateHandler struct {
 	opts *ValidateHandlerOptions
 }
 
-func NewValidateHandler(opts *ValidateHandlerOptions) (http.Handler, error) {
+func NewValidateHandler(ctx context.Context, opts *ValidateHandlerOptions) (http.Handler, error) {
 	handler := &validateHandler{opts: opts}
 
 	// a TUF client can only be used once, so we need to create a new one for each request.
 	// we create this one up front to ensure that the TUF root is valid and to pre-load the metadata.
 	// TODO: this pre-loading works for the root, targets, snapshot, and timestamp roles, but not for delegated roles.
-	_, err := handler.newVerifier()
+	_, err := handler.newVerifier(ctx)
 	if err != nil {
 		// if this failed, don't return an error, just log it and continue
 		// this prevents the server from getting into a crash loop if the TUF repo is down or broken,
@@ -61,7 +62,7 @@ func NewValidateHandler(opts *ValidateHandlerOptions) (http.Handler, error) {
 	return handler, nil
 }
 
-func (h *validateHandler) newVerifier() (attest.Verifier, error) {
+func (h *validateHandler) newVerifier(ctx context.Context) (attest.Verifier, error) {
 	root, err := tuf.GetEmbeddedRoot(h.opts.TUFRoot)
 	if err != nil {
 		return nil, err
@@ -81,7 +82,7 @@ func (h *validateHandler) newVerifier() (attest.Verifier, error) {
 		ReferrersRepo:    h.opts.ReferrersRepo,
 		Debug:            true,
 	}
-	verifier, err := attest.NewVerifier(policyOpts)
+	verifier, err := attest.NewVerifier(ctx, policyOpts)
 	if err != nil {
 		return nil, err
 	}
@@ -116,7 +117,7 @@ func (h *validateHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	}
 
 	// create a new verifier for each request
-	attest, err := h.newVerifier()
+	attest, err := h.newVerifier(ctx)
 	if err != nil {
 		utils.SendResponse(nil, fmt.Sprintf("unable to create verifier: %v", err), w)
 		return

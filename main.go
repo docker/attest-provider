@@ -1,10 +1,12 @@
 package main
 
 import (
+	"context"
 	"crypto/tls"
 	"crypto/x509"
 	"flag"
 	"fmt"
+	"net"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -12,6 +14,7 @@ import (
 
 	"github.com/docker/attest-provider/pkg/handler"
 	"github.com/docker/attest-provider/pkg/utils"
+	"github.com/docker/attest/useragent"
 
 	"k8s.io/klog/v2"
 )
@@ -53,6 +56,7 @@ const (
 var (
 	defaultTUFOutputPath  = filepath.Join("/tuf_temp", ".docker", "tuf")
 	defaultPolicyCacheDir = filepath.Join("/tuf_temp", ".docker", "policy")
+	version               = ""
 )
 
 var timeoutError = string(utils.GatekeeperError("operation timed out"))
@@ -82,7 +86,9 @@ func main() {
 	mux := http.NewServeMux()
 	handlerTimeout := time.Duration(handlerTimeoutSeconds) * time.Second
 
-	validateHandler, err := handler.NewValidateHandler(&handler.ValidateHandlerOptions{
+	ctx := useragent.Set(context.Background(), "attest-provider/"+version+" (docker)")
+
+	validateHandler, err := handler.NewValidateHandler(ctx, &handler.ValidateHandlerOptions{
 		TUFRoot:          tufRoot,
 		TUFOutputPath:    tufoutputPath,
 		TUFMetadataURL:   metadataURL,
@@ -113,6 +119,9 @@ func main() {
 		Addr:              fmt.Sprintf(":%d", port),
 		Handler:           mux,
 		ReadHeaderTimeout: readHeaderTimeout,
+		BaseContext: func(_ net.Listener) context.Context {
+			return ctx
+		},
 	}
 
 	config := &tls.Config{
