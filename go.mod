@@ -3,7 +3,7 @@ module github.com/docker/attest-provider
 go 1.22.5
 
 require (
-	github.com/docker/attest v0.5.2
+	github.com/docker/attest v0.6.0
 	github.com/google/go-containerregistry v0.20.2
 	github.com/in-toto/in-toto-golang v0.9.0
 	github.com/open-policy-agent/frameworks/constraint v0.0.0-20221214024800-b745745c4118
@@ -26,8 +26,8 @@ require (
 	github.com/agnivade/levenshtein v1.1.1 // indirect
 	github.com/asaskevich/govalidator v0.0.0-20230301143203-a9d515a09cc2 // indirect
 	github.com/aws/aws-sdk-go-v2 v1.30.5 // indirect
-	github.com/aws/aws-sdk-go-v2/config v1.27.33 // indirect
-	github.com/aws/aws-sdk-go-v2/credentials v1.17.32 // indirect
+	github.com/aws/aws-sdk-go-v2/config v1.27.35 // indirect
+	github.com/aws/aws-sdk-go-v2/credentials v1.17.33 // indirect
 	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.16.13 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/configsources v1.3.17 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.6.17 // indirect
@@ -37,9 +37,9 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/internal/accept-encoding v1.11.4 // indirect
 	github.com/aws/aws-sdk-go-v2/service/internal/presigned-url v1.11.19 // indirect
 	github.com/aws/aws-sdk-go-v2/service/kms v1.35.5 // indirect
-	github.com/aws/aws-sdk-go-v2/service/sso v1.22.7 // indirect
-	github.com/aws/aws-sdk-go-v2/service/ssooidc v1.26.7 // indirect
-	github.com/aws/aws-sdk-go-v2/service/sts v1.30.7 // indirect
+	github.com/aws/aws-sdk-go-v2/service/sso v1.22.8 // indirect
+	github.com/aws/aws-sdk-go-v2/service/ssooidc v1.26.8 // indirect
+	github.com/aws/aws-sdk-go-v2/service/sts v1.30.8 // indirect
 	github.com/aws/smithy-go v1.20.4 // indirect
 	github.com/awslabs/amazon-ecr-credential-helper/ecr-login v0.0.0-20231024185945-8841054dbdb8 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
@@ -124,7 +124,7 @@ require (
 	github.com/sigstore/cosign/v2 v2.4.0 // indirect
 	github.com/sigstore/protobuf-specs v0.3.2 // indirect
 	github.com/sigstore/rekor v1.3.6 // indirect
-	github.com/sigstore/sigstore v1.8.8 // indirect
+	github.com/sigstore/sigstore v1.8.9 // indirect
 	github.com/sigstore/sigstore/pkg/signature/kms/aws v1.8.9 // indirect
 	github.com/sigstore/sigstore/pkg/signature/kms/gcp v1.8.9 // indirect
 	github.com/sigstore/timestamp-authority v1.2.2 // indirect

@@ -10,7 +10,7 @@ import (
 
 	"github.com/docker/attest"
 	"github.com/docker/attest-provider/pkg/utils"
-	"github.com/docker/attest/config"
+	"github.com/docker/attest/mapping"
 	"github.com/docker/attest/oci"
 	"github.com/docker/attest/policy"
 	"github.com/docker/attest/tuf"
@@ -63,7 +63,7 @@ func NewValidateHandler(ctx context.Context, opts *ValidateHandlerOptions) (http
 	return handler, nil
 }
 
-func (h *validateHandler) newVerifier(ctx context.Context) (attest.Verifier, error) {
+func (h *validateHandler) newVerifier(ctx context.Context) (*attest.ImageVerifier, error) {
 	root, err := tuf.GetEmbeddedRoot(h.opts.TUFRoot)
 	if err != nil {
 		return nil, err
@@ -80,11 +80,11 @@ func (h *validateHandler) newVerifier(ctx context.Context) (attest.Verifier, err
 		},
 		LocalTargetsDir:  h.opts.PolicyCacheDir,
 		LocalPolicyDir:   h.opts.PolicyDir,
-		AttestationStyle: config.AttestationStyle(h.opts.AttestationStyle),
+		AttestationStyle: mapping.AttestationStyle(h.opts.AttestationStyle),
 		ReferrersRepo:    h.opts.ReferrersRepo,
 		Debug:            true,
 	}
-	verifier, err := attest.NewVerifier(ctx, policyOpts)
+	verifier, err := attest.NewImageVerifier(ctx, policyOpts)
 	if err != nil {
 		return nil, err
 	}
