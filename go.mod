@@ -3,7 +3,7 @@ module github.com/docker/attest-provider
 go 1.22.5
 
 require (
-	github.com/docker/attest v0.6.4
+	github.com/docker/attest v0.6.5
 	github.com/google/go-containerregistry v0.20.2
 	github.com/in-toto/in-toto-golang v0.9.0
 	github.com/open-policy-agent/frameworks/constraint v0.0.0-20221214024800-b745745c4118
@@ -145,7 +145,7 @@ require (
 	github.com/syndtr/goleveldb v1.0.1-0.20220721030215-126854af5e6d // indirect
 	github.com/tchap/go-patricia/v2 v2.3.1 // indirect
 	github.com/theupdateframework/go-tuf v0.7.0 // indirect
-	github.com/theupdateframework/go-tuf/v2 v2.0.1 // indirect
+	github.com/theupdateframework/go-tuf/v2 v2.0.2 // indirect
 	github.com/titanous/rocacheck v0.0.0-20171023193734-afe73141d399 // indirect
 	github.com/transparency-dev/merkle v0.0.2 // indirect
 	github.com/vbatts/tar-split v0.11.5 // indirect
