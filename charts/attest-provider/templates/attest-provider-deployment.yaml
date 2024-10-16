@@ -57,6 +57,9 @@ spec:
         {{- if .Values.referrersRepo }}
         - --referrers-source={{ .Values.referrersRepo }}
         {{- end }}
+        {{- if .Values.parameters }}
+        - --parameters={{ .Values.parameters }}
+        {{- end }}
 
         ports:
         - containerPort: {{ .Values.port }}

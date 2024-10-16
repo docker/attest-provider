@@ -38,6 +38,7 @@ type ValidateHandlerOptions struct {
 
 	AttestationStyle string
 	ReferrersRepo    string
+	Parameters       map[string]string
 }
 
 type validateHandler struct {
@@ -83,6 +84,7 @@ func (h *validateHandler) newVerifier(ctx context.Context) (*attest.ImageVerifie
 		AttestationStyle: mapping.AttestationStyle(h.opts.AttestationStyle),
 		ReferrersRepo:    h.opts.ReferrersRepo,
 		Debug:            true,
+		Parameters:       h.opts.Parameters,
 	}
 	verifier, err := attest.NewImageVerifier(ctx, policyOpts)
 	if err != nil {

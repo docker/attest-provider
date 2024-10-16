@@ -22,6 +22,11 @@ tufTargetsSource: registry-1.docker.io/docker/tuf-targets
 
 attestationStyle: referrers
 
+# parameters for the the policy implementation
+# e.g. parameters: "mode=strict"
+
+parameters: ""
+
 provider:
   timeout: 30
   tls:

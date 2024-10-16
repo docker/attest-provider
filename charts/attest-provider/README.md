@@ -15,3 +15,4 @@
 |attestationStyle|lookup attestations from image index (`attached`) or `referrers`|`referrers`|
 |provider.timeout|timeout in seconds for gatekeeper external data request|`30`|
 |provider.tls.caBundle|base64 encoded CA cert for provider|`""`|
+|parameters|additional parameters to pass to the policy implementation|`""`|

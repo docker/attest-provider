@@ -118,6 +118,7 @@ jobs:
             --set tufRoot=staging \
             --set tufMetadataSource=https://docker.github.io/tuf-staging/metadata \
             --set tufTargetsSource=https://docker.github.io/tuf-staging/targets \
+            --set parameters="mode=strict" \
             --namespace security \
             --wait --debug
 

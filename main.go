@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/docker/attest-provider/pkg/handler"
@@ -47,6 +48,7 @@ var (
 
 	attestationStyle string
 	referrersRepo    string
+	parameters       nameValuePairs
 )
 
 const (
@@ -60,6 +62,27 @@ var (
 	defaultPolicyCacheDir = filepath.Join("/tuf_temp", ".docker", "policy")
 	version               = ""
 )
+
+type nameValuePairs map[string]string
+
+func (nvp *nameValuePairs) String() string {
+	return fmt.Sprintf("%v", *nvp)
+}
+
+func (nvp *nameValuePairs) Set(value string) error {
+	parts := strings.Split(value, ",")
+	if len(parts) == 1 {
+		return fmt.Errorf("invalid format, expected name=value")
+	}
+	for _, part := range parts {
+		kv := strings.Split(part, "=")
+		if len(kv) != 2 {
+			return fmt.Errorf("invalid format, expected name=value")
+		}
+		(*nvp)[kv[0]] = kv[1]
+	}
+	return nil
+}
 
 var timeoutError = string(utils.GatekeeperError("operation timed out"))
 
@@ -81,6 +104,9 @@ func init() {
 
 	flag.StringVar(&attestationStyle, "attestation-style", "referrers", "attestation style [referrers, attached]")
 	flag.StringVar(&referrersRepo, "referrers-source", "", "repo from which to fetch Referrers for attestation lookup")
+
+	parameters = make(nameValuePairs)
+	flag.Var(&parameters, "parameters", "policy parameters in name=value,name1,value1 format")
 
 	flag.Parse()
 }
@@ -105,6 +131,7 @@ func main() {
 		PolicyCacheDir:   policyCacheDir,
 		AttestationStyle: attestationStyle,
 		ReferrersRepo:    referrersRepo,
+		Parameters:       parameters,
 	})
 	if err != nil {
 		klog.ErrorS(err, "unable to create validate handler")
