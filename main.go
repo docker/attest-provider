@@ -48,7 +48,7 @@ var (
 
 	attestationStyle string
 	referrersRepo    string
-	parameters       nameValuePairs = make(nameValuePairs)
+	parameters       = make(nameValuePairs)
 )
 
 const (
@@ -86,7 +86,7 @@ func (nvp nameValuePairs) Set(value string) error {
 
 var timeoutError = string(utils.GatekeeperError("operation timed out"))
 
-// using initFlags to initialize the flags (standard init is a pain for testing)
+// using initFlags to initialize the flags (standard init is a pain for testing).
 func initFlags() {
 	klog.InitFlags(nil)
 	flag.StringVar(&certDir, "cert-dir", "", "path to directory containing TLS certificates")
