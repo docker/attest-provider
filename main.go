@@ -48,7 +48,7 @@ var (
 
 	attestationStyle string
 	referrersRepo    string
-	parameters       nameValuePairs
+	parameters       nameValuePairs = make(nameValuePairs)
 )
 
 const (
@@ -65,28 +65,29 @@ var (
 
 type nameValuePairs map[string]string
 
-func (nvp *nameValuePairs) String() string {
-	return fmt.Sprintf("%v", *nvp)
+func (nvp nameValuePairs) String() string {
+	return fmt.Sprintf("%v", map[string]string(nvp))
 }
 
-func (nvp *nameValuePairs) Set(value string) error {
-	parts := strings.Split(value, ",")
-	if len(parts) == 1 {
-		return fmt.Errorf("invalid format, expected name=value")
+func (nvp nameValuePairs) Set(value string) error {
+	if value == "" {
+		return nil
 	}
+	parts := strings.Split(value, ",")
 	for _, part := range parts {
 		kv := strings.Split(part, "=")
 		if len(kv) != 2 {
 			return fmt.Errorf("invalid format, expected name=value")
 		}
-		(*nvp)[kv[0]] = kv[1]
+		nvp[kv[0]] = kv[1]
 	}
 	return nil
 }
 
 var timeoutError = string(utils.GatekeeperError("operation timed out"))
 
-func init() {
+// using initFlags to initialize the flags (standard init is a pain for testing)
+func initFlags() {
 	klog.InitFlags(nil)
 	flag.StringVar(&certDir, "cert-dir", "", "path to directory containing TLS certificates")
 	flag.StringVar(&clientCAFile, "client-ca-file", "", "path to client CA certificate")
@@ -105,13 +106,13 @@ func init() {
 	flag.StringVar(&attestationStyle, "attestation-style", "referrers", "attestation style [referrers, attached]")
 	flag.StringVar(&referrersRepo, "referrers-source", "", "repo from which to fetch Referrers for attestation lookup")
 
-	parameters = make(nameValuePairs)
 	flag.Var(&parameters, "parameters", "policy parameters in name=value,name1,value1 format")
 
 	flag.Parse()
 }
 
 func main() {
+	initFlags()
 	mux := http.NewServeMux()
 	handlerTimeout := time.Duration(handlerTimeoutSeconds) * time.Second
 
